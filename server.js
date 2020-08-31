@@ -9,6 +9,10 @@ var roomMap = new Map(); //This will store the data of all the current rooms we 
 
 io.on("connection",(socket)=>{
 
+
+    socket.on('disconnecting',()=>{
+        disconnectRoom(socket);
+    })
     const native = socket.request._query.native;
     const target = socket.request._query.target;
 
@@ -19,13 +23,14 @@ io.on("connection",(socket)=>{
 
     var roomId = null;
     if(availableRooms){
-        console.log("This means we found some availble rooms");
-        roomId = availableRooms[0];
+        
+        roomId = availableRooms[0].roomId;
+        console.log(roomId);
         availableRooms[0].setUser2({name:'generic user 2'})
     }
     else{
         roomId = uuid4();
-        console.log("That means this is a new room");
+        console.log(roomId);
         const room =  new Room(roomId);
         room.setUser1({name:'generic user 1'});
         const lookingFor = {native:target,target:native} //Looking for a user with opposite native/target language
@@ -33,7 +38,10 @@ io.on("connection",(socket)=>{
        
     }
     joinRoom(socket,roomId);
-})
+});
+
+
+
 
 
 
@@ -63,6 +71,6 @@ joinRoom = (socket,roomId)=>{
     });
 }
 
-disconnectRoom = ()=>{
-    socket.close
+disconnectRoom = (socket)=>{
+    console.log(socket + "has disconnected from room")
 }

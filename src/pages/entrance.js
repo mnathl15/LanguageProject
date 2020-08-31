@@ -3,7 +3,7 @@ import React from 'react';
 
 import { Component } from 'react';
 import "regenerator-runtime/runtime.js";
-import { Select, AsyncSelect, MultiSelect } from 'dropdown-select';
+import { Select} from 'dropdown-select';
 import 'dropdown-select/dist/css/dropdown-select.css';
 import "../styles/entrance.css"
 

@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import './styles/styles.css';
 import { Component } from 'react';
 import Entrance from './pages/entrance';
-import Connection from './pages/connection';
+import VideoRoom from './pages/video-room';
 
 
 class App extends Component{
@@ -12,7 +12,7 @@ class App extends Component{
 
        this.state={
          entered:false,
-         preferences:null  
+         preferences:null
        }
       
     }
@@ -32,7 +32,7 @@ class App extends Component{
                     ?
                     <Entrance toggleEntered={(preferences)=>this.toggleEntered(preferences)}/>
                     :
-                    <Connection preferences={this.state.preferences}/>
+                    <VideoRoom preferences={this.state.preferences}/>
                 }
             </div>
             
