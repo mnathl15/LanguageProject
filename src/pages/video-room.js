@@ -12,6 +12,7 @@ import Loading from "react-spinners/ClipLoader";
 
 var conn =  null;
 var socket = null;
+var peer = null;
 class VideoRoom extends Component{
     constructor(props){
         super(props);
@@ -20,17 +21,12 @@ class VideoRoom extends Component{
             otherId:null,
             loading:false,
             isSearching:false,
+            videoAvailable:false
         }
+
+        this.vidRef = React.createRef();
     }
 
-   
-
-     componentDidMount(){
-
-        
-       
-        
-    }
     
     setUpSockets = ()=>{
         this.setState({loading:true,isSearching:true},()=>{
@@ -44,18 +40,29 @@ class VideoRoom extends Component{
              socket.on('otherId',(otherId)=> {
                 this.setState({otherId:otherId});
              });
+             socket.on('friend-disconnection',()=>{
+                 alert('friend disconnected');
+             })
         })
     }
 
     disconnect = ()=>{
         socket.close();
-        this.setState({loading:false,isSearching:false});
+        peer.disconnect();
+        this.setState({
+            loading:false,
+            isSearching:false,
+            videoAvailable:true,
+            id:null,
+            otherId:null
+        
+        
+        });
     }
 
 
     connect=()=>{
-
-        var peer = new Peer(this.state.id,{
+        peer = new Peer(this.state.id,{
             host:'/',
             port:'3001'
         });
@@ -63,22 +70,26 @@ class VideoRoom extends Component{
             navigator.mediaDevices.getUserMedia({video:true}).then((stream)=>{
                 call.answer(stream);
                 call.on('stream',(remoteStream)=>{
-                    var videoFrame = document.getElementById('video-frame');
-                    videoFrame.srcObject = remoteStream;
-                    videoFrame.play();
+                    this.vidRef.current.srcObject = remoteStream;
+                    this.vidRef.current.play();
                 });
             });
         })
         navigator.mediaDevices.getUserMedia({video:true}).then((stream)=>{
             const call = peer.call(this.state.otherId,stream);
-            call.on('stream',remoteStream=>{
-                console.log('here');
-                this.setState({loading:false},()=>{
-                    var videoFrame = document.getElementById('video-frame');
-                    videoFrame.srcObject = remoteStream;
-                    videoFrame.play();
+            console.log(call);
+            try{
+                call.on('stream',remoteStream=>{
+                    this.setState({loading:false,videoAvailable:true},()=>{
+                        this.vidRef.current.srcObject = remoteStream;
+                        this.vidRef.current.play();
+                    })
                 })
-            })
+            }
+            catch(error){
+                console.log(error);
+            }
+            
         });
             
         conn = peer.connect(this.state.otherId);
@@ -120,9 +131,11 @@ class VideoRoom extends Component{
                 <div className="video-container">
                     
                     {!this.state.loading ?
-                        <video  id="video-frame">
-                            <source/>
-                        </video>
+                        this.state.videoAvailable &&
+                            <video ref={this.vidRef} id="video-frame">
+                                <source/>
+                            </video>
+                            
                         :
                         <Loading size={150}/>
                     }

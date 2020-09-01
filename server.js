@@ -10,8 +10,9 @@ var roomMap = new Map(); //This will store the data of all the current rooms we 
 io.on("connection",(socket)=>{
 
 
-    socket.on('disconnecting',()=>{
-        disconnectRoom(socket);
+    socket.on('disconnecting',(data)=>{
+        
+        onDisconnectRoom(socket);
     })
     const native = socket.request._query.native;
     const target = socket.request._query.target;
@@ -25,12 +26,12 @@ io.on("connection",(socket)=>{
     if(availableRooms){
         
         roomId = availableRooms[0].roomId;
-        console.log(roomId);
+       
         availableRooms[0].setUser2({name:'generic user 2'})
     }
     else{
         roomId = uuid4();
-        console.log(roomId);
+        
         const room =  new Room(roomId);
         room.setUser1({name:'generic user 1'});
         const lookingFor = {native:target,target:native} //Looking for a user with opposite native/target language
@@ -71,6 +72,8 @@ joinRoom = (socket,roomId)=>{
     });
 }
 
-disconnectRoom = (socket)=>{
-    console.log(socket + "has disconnected from room")
+//Called when one socket disconnects, this function tells the other user that the user has disconnected
+onDisconnectRoom = (socket)=>{
+    const room = Object.keys(socket.rooms)[1];
+    socket.broadcast.in(room).emit("friend-disconnection","hello");; 
 }
